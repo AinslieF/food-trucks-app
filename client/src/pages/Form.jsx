@@ -7,74 +7,136 @@ function Form() {
     currentLocation: "",
     dailySpecial: "",
     slogan: "",
-    hasVeganOptions: "",
-    priceLevel: "",
-    rating: "",
+    hasVeganOptions: false,
+    priceLevel: 1,
+    rating: 0,
   });
-  const [foodTruckData, setFoodTruckData] = useState(null);
 
-  async function writeFoodTruckData(data) {
-    await fetch("http://localhost:3000/add-one-user", {
+  // Send form data to the API to add a new food truck
+  async function writeFoodTruckData() {
+    const dataForAPI = {
+      name: formData.name,
+      current_location: formData.currentLocation,
+      daily_special: formData.dailySpecial,
+      slogan: formData.slogan,
+      has_vegan_options: formData.hasVeganOptions,
+      price_level: Number(formData.priceLevel),
+      rating: Number(formData.rating),
+    };
+
+    await fetch("/api/add-one-food-truck", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        name: data.name,
-        currentLocation: data.current_location,
-        dailySpecial: data.daily_special,
-        slogan: data.slogan,
-        hasVeganOptions: data.has_vegan_options,
-        priceLevel: data.price_level,
-        rating: data.rating,
-      }),
+      body: JSON.stringify(dataForAPI),
     });
   }
 
-  // Update the state when input values change
+  // handle changes to the form inputs
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type, checked } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
-  // Handle form submission
+  // handle when the user submits the form
   const handleSubmit = (e) => {
     e.preventDefault();
-    // send the data to the database via the API
-    writeFoodTruckData(formData);
-
-    // save the user's profile data into the state variable to be displayed in JSX
-    setUserInfo(foodTruckData);
-
-    // reset the form to empty state
-    setFormData(emptyFormState);
+    writeFoodTruckData();
+    alert("Thanks for submitting a new food truck!");
   };
 
+  // render JSX for the form to the page
   return (
     <>
       <h1>Add Food Truck</h1>
+
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-          placeholder="Full name"
-        ></input>
-        <input
-          type="text"
-          name="bio"
-          value={formData.currentLocation}
-          onChange={handleInputChange}
-          placeholder="Current Location"
-        ></input>
-        <input
-          type="text"
-          name="bio"
-          value={formData.dailySpecial}
-          onChange={handleInputChange}
-          placeholder="Daily Special"
-        ></input>
+        <label>
+          Food Truck Name
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+          />
+        </label>
+
+        <label>
+          Current Location
+          <input
+            type="text"
+            name="currentLocation"
+            value={formData.currentLocation}
+            onChange={handleInputChange}
+          />
+        </label>
+
+        <label>
+          Daily Special
+          <input
+            type="text"
+            name="dailySpecial"
+            value={formData.dailySpecial}
+            onChange={handleInputChange}
+          />
+        </label>
+
+        <label>
+          Slogan
+          <input
+            type="text"
+            name="slogan"
+            value={formData.slogan}
+            onChange={handleInputChange}
+          />
+        </label>
+
+        <label>
+          Has Vegan Options?
+          <select
+            name="hasVeganOptions"
+            value={formData.hasVeganOptions}
+            onChange={handleInputChange}
+          >
+            <option value="">Select</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+
+        <label>
+          Price Level
+          <select
+            name="priceLevel"
+            value={formData.priceLevel}
+            onChange={handleInputChange}
+          >
+            <option value="1">1 (Cheap)</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5 (Expensive)</option>
+          </select>
+        </label>
+
+        <label>
+          Rating (between 0 to 5)
+          <input
+            type="number"
+            name="rating"
+            min="0"
+            max="5"
+            step="0.1"
+            value={formData.rating}
+            onChange={handleInputChange}
+          />
+        </label>
+
         <button type="submit">Submit</button>
       </form>
     </>
@@ -82,14 +144,3 @@ function Form() {
 }
 
 export default Form;
-
-- [x]  [Ainslie](https://github.com/AinslieF/countries-app)
-- [x]  [Babz](https://github.com/Babz-G/countries-app)
-- [x]  [Haine](https://github.com/Haine88/countries-app)
-- [x]  [Jackie](https://github.com/jaclyn16/countries-app)
-- [x]  [Jenny](https://github.com/jennivonsta/countries-app)
-- [x]  [Megan](https://github.com/meganirenegott/countries-app)
-- [ ]  [Mimi](https://github.com/mimiiiren/countries-app)
-- [x]  [Priscilla](https://github.com/RPMorrigan/countries-app)
-- [ ]  [Stephanie](https://github.com/StepLeonard/countries-app)
-- [ ]  [Tee](https://github.com/Tporterinbox/countries-app)

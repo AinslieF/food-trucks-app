@@ -8,7 +8,7 @@ import config from "./config.js";
 
 const db = new pg.Pool({
   connectionString: config.databaseUrl + "&uselibpqcompat=true",
-  ssl: true
+  ssl: true,
 });
 
 const app = express();
@@ -31,67 +31,111 @@ async function getAllFoodTrucks() {
 
 // 2. getFoodTruckById(id)
 async function getFoodTruckById(id) {
-  const result = await db.query("SELECT * FROM food_trucks WHERE id = $1", [id]);
+  const result = await db.query("SELECT * FROM food_trucks WHERE id = $1", [
+    id,
+  ]);
   return result.rows[0];
 }
 
 // 3. getVeganFoodTrucks()
 async function getVeganFoodTrucks() {
-  const result = await db.query("SELECT * FROM food_trucks WHERE has_vegan_options = true");
+  const result = await db.query(
+    "SELECT * FROM food_trucks WHERE has_vegan_options = true",
+  );
   return result.rows;
 }
 
 // 4. getFoodTrucksByPrice(price)
 async function getFoodTrucksByPrice(price) {
-  const result = await db.query("SELECT * FROM food_trucks WHERE price_level = $1", [price]);
+  const result = await db.query(
+    "SELECT * FROM food_trucks WHERE price_level = $1",
+    [price],
+  );
   return result.rows;
 }
 
 // 5. getTopRatedFoodTrucks()
 async function getTopRatedFoodTrucks() {
-  const result = await db.query("SELECT * FROM food_trucks WHERE rating >= 4.5");
+  const result = await db.query(
+    "SELECT * FROM food_trucks WHERE rating >= 4.5",
+  );
   return result.rows;
 }
 
 // 6. getFoodTrucksSortedByRating()
 async function getFoodTrucksSortedByRating() {
-  const result = await db.query("SELECT * FROM food_trucks ORDER BY rating DESC");
+  const result = await db.query(
+    "SELECT * FROM food_trucks ORDER BY rating DESC",
+  );
   return result.rows;
 }
 
-// 7. addOneFoodTruck(name, current_location, daily_special, slogan, has_vegan_options)
-async function addOneFoodTruck(name, current_location, daily_special, slogan, has_vegan_options) {
+// 7. getFoodTrucksSortedByPrice()
+async function getFoodTrucksSortedByPrice() {
   const result = await db.query(
-    `INSERT INTO food_trucks 
-     (name, current_location, daily_special, slogan, has_vegan_options) 
-     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-    [name, current_location, daily_special, slogan, has_vegan_options]
+    "SELECT * FROM food_trucks ORDER BY price_level ASC",
   );
+  return result.rows;
+}
+
+// 8. getFoodTrucksCount()
+async function getFoodTrucksCount() {
+  const result = await db.query("SELECT COUNT(*) FROM food_trucks");
   return result.rows[0];
 }
 
-// 8. deleteOneFoodTruck(id)
+// 9. addOneFoodTruck(...)
+async function addOneFoodTruck(
+  name,
+  current_location,
+  daily_special,
+  slogan,
+  has_vegan_options,
+  price_level,
+  rating,
+) {
+  const result = await db.query(
+    `INSERT INTO food_trucks
+     (name, current_location, daily_special, slogan, has_vegan_options, price_level, rating)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     RETURNING *`,
+    [
+      name,
+      current_location,
+      daily_special,
+      slogan,
+      has_vegan_options,
+      price_level,
+      rating,
+    ],
+  );
+
+  return result.rows[0];
+}
+
+// 10. deleteOneFoodTruck(id)
 async function deleteOneFoodTruck(id) {
-  const result = await db.query("DELETE FROM food_trucks WHERE id = $1 RETURNING *", [id]);
+  const result = await db.query(
+    "DELETE FROM food_trucks WHERE id = $1 RETURNING *",
+    [id],
+  );
   return result.rows[0];
 }
 
-// 9. updateFoodTruckLocation(id, newLocation)
+// 11. updateFoodTruckLocation(id, newLocation)
 async function updateFoodTruckLocation(id, newLocation) {
-  const result = await db.query(
+  await db.query(
     "UPDATE food_trucks SET current_location = $1 WHERE id = $2 RETURNING *",
-    [newLocation, id]
+    [newLocation, id],
   );
-  return result.rows[0];
 }
 
-// 10. updateFoodTruckRating(id, newRating)
+// 12. updateFoodTruckRating(id, newRating)
 async function updateFoodTruckRating(id, newRating) {
-  const result = await db.query(
+  await db.query(
     "UPDATE food_trucks SET rating = $1 WHERE id = $2 RETURNING *",
-    [newRating, id]
+    [newRating, id],
   );
-  return result.rows[0];
 }
 
 // ---------------------------------
@@ -136,30 +180,66 @@ app.get("/get-food-trucks-sorted-by-rating", async (req, res) => {
   res.json(trucks);
 });
 
-// 7. POST /add-one-food-truck
-app.post("/add-one-food-truck", async (req, res) => {
-  const { name, current_location, daily_special, slogan, has_vegan_options } = req.body;
-  const truck = await addOneFoodTruck(name, current_location, daily_special, slogan, has_vegan_options);
-  res.json(truck);
+// 7. GET /get-food-trucks-sorted-by-price
+app.get("/get-food-trucks-sorted-by-price", async (req, res) => {
+  const trucks = await getFoodTrucksSortedByPrice();
+  res.json(trucks);
 });
 
-// 8. POST /delete-one-food-truck/:id
+// 8. GET /get-food-trucks-count
+app.get("/get-food-trucks-count", async (req, res) => {
+  const count = await getFoodTrucksCount();
+  res.json(count);
+});
+
+// 9. POST /add-one-food-truck
+app.post("/add-one-food-truck", async (req, res) => {
+  const {
+    name,
+    current_location,
+    daily_special,
+    slogan,
+    has_vegan_options,
+    price_level,
+    rating,
+  } = req.body;
+
+  const truck = await addOneFoodTruck(
+    name,
+    current_location,
+    daily_special,
+    slogan,
+    has_vegan_options,
+    price_level,
+    rating,
+  );
+
+  res.send(`Success! ${truck.name} was added!`);
+});
+
+// 10. POST /delete-one-food-truck/:id
 app.post("/delete-one-food-truck/:id", async (req, res) => {
   const id = req.params.id;
+
   const truck = await deleteOneFoodTruck(id);
-  res.json(truck);
+
+  res.send(`Success! ${truck.name} was deleted!`);
 });
 
-// 9. POST /update-food-truck-location
+// 11. POST /update-food-truck-location
 app.post("/update-food-truck-location", async (req, res) => {
   const { id, newLocation } = req.body;
-  const truck = await updateFoodTruckLocation(id, newLocation);
-  res.json(truck);
+
+  await updateFoodTruckLocation(id, newLocation);
+
+  res.send(`Success! The food truck location was updated!`);
 });
 
-// 10. POST /update-food-truck-rating
+// 12. POST /update-food-truck-rating
 app.post("/update-food-truck-rating", async (req, res) => {
   const { id, newRating } = req.body;
-  const truck = await updateFoodTruckRating(id, newRating);
-  res.json(truck);
+
+  await updateFoodTruckRating(id, newRating);
+
+  res.send(`Success! The food truck rating was updated!`);
 });

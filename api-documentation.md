@@ -6,24 +6,24 @@
 
 ## Overview
 
-| Number | Assignee  | Method | Endpoint                            | Description                                                |
-| ------ | --------- | ------ | ----------------------------------- | ---------------------------------------------------------- |
-| 1      |           | GET    | `/get-all-food-trucks`              | Retrieves all food trucks from the database.               |
-| 2      | Ainslie   | GET    | `/get-food-truck-by-id/:id`         | Retrieves one food truck by its id number.                 |
-| 3      | Babz      | GET    | `/get-vegan-food-trucks`            | Retrieves all food trucks that offer vegan options.        |
-| 4      | Haine     | GET    | `/get-food-trucks-by-price/:price`  | Retrieves food trucks that match a specific price level.   |
-| 5      | Jackie    | GET    | `/get-top-rated-food-trucks`        | Retrieves food trucks with rating 4.5 or higher.           |
-| 6      | Jenny     | GET    | `/get-food-trucks-sorted-by-rating` | Retrieves food trucks sorted by rating (highest first).    |
-| 7      | Megan     | GET    | `/get-food-trucks-sorted-by-price`  | Retrieves food trucks sorted by price (lowest first).      |
-| 8      | Mimi      | GET    | `/get-food-trucks-count`            | Retrieves the total number of food trucks in the database. |
-| 9      |           | POST   | `/add-one-food-truck`               | Adds a new food truck to the database.                     |
-| 10     | Priscilla | POST   | `/delete-one-food-truck/:id`        | Deletes one food truck by its id number.                   |
-| 11     | Stephanie | POST   | `/update-food-truck-location`       | Updates the location of a food truck.                      |
-| 12     | Tee       | POST   | `/update-food-truck-rating`         | Updates the rating of a food truck.                        |
+| Number | Assignee  | Method | Endpoint                            | Description                                                 |
+| ------ | --------- | ------ | ----------------------------------- | ----------------------------------------------------------- |
+| 1      |           | GET    | `/get-all-food-trucks`              | Retrieves all food trucks from the database.                |
+| 2      | Ainslie   | GET    | `/get-food-truck-by-id/:id`         | Retrieves one food truck by its id number.                  |
+| 3      | Babz      | GET    | `/get-vegan-food-trucks`            | Retrieves all food trucks that offer vegan options.         |
+| 4      | Haine     | GET    | `/get-food-trucks-by-price/:price`  | Retrieves food trucks that match a specific price level.    |
+| 5      | Jackie    | GET    | `/get-top-rated-food-trucks`        | Retrieves food trucks with rating 4.5 or higher.            |
+| 6      | Jenny     | GET    | `/get-food-trucks-sorted-by-rating` | Retrieves food trucks sorted by rating (highest first).     |
+| 7      | Megan     | GET    | `/get-food-trucks-sorted-by-price`  | Retrieves food trucks sorted by price level (lowest first). |
+| 8      | Mimi      | GET    | `/get-food-trucks-count`            | Retrieves the total number of food trucks in the database.  |
+| 9      |           | POST   | `/add-one-food-truck`               | Adds a new food truck to the database.                      |
+| 10     | Priscilla | POST   | `/delete-one-food-truck/:id`        | Deletes one food truck by its id number.                    |
+| 11     | Stephanie | POST   | `/update-food-truck-location`       | Updates the location of a food truck.                       |
+| 12     | Tee       | POST   | `/update-food-truck-rating`         | Updates the rating of a food truck.                         |
 
 ---
 
-## Database Schema
+# Database Schema
 
 ```sql
 CREATE TABLE food_trucks (
@@ -32,27 +32,35 @@ CREATE TABLE food_trucks (
     current_location VARCHAR,
     daily_special VARCHAR,
     slogan VARCHAR,
-    has_vegan_options BOOLEAN,
-    price_level INTEGER,
-    rating DECIMAL(2,1)
+    has_vegan_options BOOLEAN DEFAULT false,
+    price_level INTEGER DEFAULT 2 CHECK (price_level BETWEEN 1 AND 4),
+    rating DECIMAL(2,1) DEFAULT 4.0 CHECK (rating BETWEEN 0 AND 5)
 );
 ```
 
-Sample seed data:
+These defaults make the database more beginner-friendly. If a request does not include `has_vegan_options`, `price_level`, or `rating`, PostgreSQL will automatically fill them with default values.
+
+---
+
+## Sample Seed Data
 
 ```sql
-INSERT INTO food_trucks (id, name, current_location, daily_special, slogan, has_vegan_options, price_level, rating) VALUES
-(1, 'Bert''s Beets', 'Farmer''s Market, Oak & 3rd', 'The Crimson Devastator — beet soup served inside of hollowed out beets', 'You WILL taste the earth.', true, 2, 4.3),
-(2, 'Nacho Average Nacho', 'Parked outside the DMV on Elm St', 'The Existential Crisis — 4lbs of nachos with toppings you didn''t ask for but probably needed', 'You''ve been waiting two hours. You deserve this.', false, 3, 4.6),
-(3, 'Wrapscallion', 'Business Park Lot C', 'The LinkedIn Wrap — grilled chicken, unsolicited advice, and a side of ''circling back''', 'Disrupting the wrap vertical since 2019.', true, 2, 3.9),
-(4, 'Pita Party', 'Outside the gym on Maple Ave', 'The Plus One — stuffed pita with roasted veggies, tzatziki, and a second pita nobody invited but everyone was glad showed up', 'Everyone''s welcome. Especially carbs.', true, 2, 4.5),
-(5, 'Grill Murray', 'Film festival grounds, West Pavilion', 'The Groundhog Day Special — same burger as yesterday. And the day before.', 'No one will ever believe you ate here.', false, 3, 3.8),
-(6, 'Cluck Norris', 'Corner of Pain Ave and Delicious Blvd', 'The Roundhouse — a chicken sandwich so spicy it has its own criminal record', 'Heat so intense, it has a black belt.', false, 4, 3.7),
-(7, 'Roll With It', 'Convention Center food court annex', 'The Commitment — a sushi burrito the size of a forearm that requires both hands and a life decision', 'You said you weren''t that hungry. We don''t believe you.', true, 4, 4.8),
-(8, 'Fry Hard: With a Vengeance', 'Stadium parking lot, Gate 4', 'The Yippee-Ki-Fry — loaded waffle fries with pulled pork and ''I can''t believe this is legal'' sauce', 'Welcome to the fry, pal.', false, 3, 4.2),
-(9, 'The Meltdown', 'Corner of Main & 5th, next to the pigeons', 'The Structural Failure — a grilled cheese so loaded with toppings it collapses before it reaches your mouth, served with soup for the aftermath', 'It will fall apart. That''s the point.', true, 2, 4.4),
-(10, 'Batter Up', 'Downtown Arts District, Vine & 2nd', 'The Grand Slam — a savory waffle stacked with fried chicken, hot honey, and pickles, served with a tiny baseball helmet full of mac and cheese', 'Step up to the plate. We''re ready.', false, 3, 4.6);
+INSERT INTO food_trucks (name, current_location, daily_special, slogan, has_vegan_options, price_level, rating) VALUES
+('Bert''s Beets', 'Farmer''s Market, Oak & 3rd', 'The Crimson Devastator — beet soup served inside of hollowed out beets', 'You WILL taste the earth.', true, 2, 4.3),
+('Nacho Average Nacho', 'Parked outside the DMV on Elm St', 'The Existential Crisis — 4lbs of nachos with toppings you didn''t ask for but probably needed', 'You''ve been waiting two hours. You deserve this.', false, 3, 4.6),
+('Wrapscallion', 'Business Park Lot C', 'The LinkedIn Wrap — grilled chicken, unsolicited advice, and a side of ''circling back''', 'Disrupting the wrap vertical since 2019.', true, 2, 3.9),
+('Pita Party', 'Outside the gym on Maple Ave', 'The Plus One — stuffed pita with roasted veggies, tzatziki, and a second pita nobody invited but everyone was glad showed up', 'Everyone''s welcome. Especially carbs.', true, 2, 4.5),
+('Grill Murray', 'Film festival grounds, West Pavilion', 'The Groundhog Day Special — same burger as yesterday. And the day before.', 'No one will ever believe you ate here.', false, 3, 3.8),
+('Cluck Norris', 'Corner of Pain Ave and Delicious Blvd', 'The Roundhouse — a chicken sandwich so spicy it has its own criminal record', 'Heat so intense, it has a black belt.', false, 4, 3.7),
+('Roll With It', 'Convention Center food court annex', 'The Commitment — a sushi burrito the size of a forearm that requires both hands and a life decision', 'You said you weren''t that hungry. We don''t believe you.', true, 4, 4.8),
+('Fry Hard: With a Vengeance', 'Stadium parking lot, Gate 4', 'The Yippee-Ki-Fry — loaded waffle fries with pulled pork and ''I can''t believe this is legal'' sauce', 'Welcome to the fry, pal.', false, 3, 4.2),
+('The Meltdown', 'Corner of Main & 5th, next to the pigeons', 'The Structural Failure — a grilled cheese so loaded with toppings it collapses before it reaches your mouth, served with soup for the aftermath', 'It will fall apart. That''s the point.', true, 2, 4.4),
+('Batter Up', 'Downtown Arts District, Vine & 2nd', 'The Grand Slam — a savory waffle stacked with fried chicken, hot honey, and pickles, served with a tiny baseball helmet full of mac and cheese', 'Step up to the plate. We''re ready.', false, 3, 4.6);
 ```
+
+---
+
+# API Endpoints
 
 ---
 
@@ -170,14 +178,24 @@ INSERT INTO food_trucks (id, name, current_location, daily_special, slogan, has_
 ```json
 [
   {
-    "id": 6,
-    "name": "Cluck Norris",
-    "rating": 4.7
-  },
-  {
     "id": 7,
     "name": "Roll With It",
     "rating": 4.8
+  },
+  {
+    "id": 2,
+    "name": "Nacho Average Nacho",
+    "rating": 4.6
+  },
+  {
+    "id": 10,
+    "name": "Batter Up",
+    "rating": 4.6
+  },
+  {
+    "id": 4,
+    "name": "Pita Party",
+    "rating": 4.5
   }
 ]
 ```
@@ -201,9 +219,9 @@ INSERT INTO food_trucks (id, name, current_location, daily_special, slogan, has_
     "rating": 4.8
   },
   {
-    "id": 6,
-    "name": "Cluck Norris",
-    "rating": 4.7
+    "id": 2,
+    "name": "Nacho Average Nacho",
+    "rating": 4.6
   }
 ]
 ```
@@ -212,7 +230,7 @@ INSERT INTO food_trucks (id, name, current_location, daily_special, slogan, has_
 
 ## 🔹 7. GET `/get-food-trucks-sorted-by-price`
 
-**Description:** Retrieves food trucks sorted by price (lowest first).
+**Description:** Retrieves food trucks sorted by price level from lowest to highest.
 
 **Example Request URL:**  
 `GET http://localhost:3000/get-food-trucks-sorted-by-price`
@@ -224,19 +242,19 @@ INSERT INTO food_trucks (id, name, current_location, daily_special, slogan, has_
   {
     "id": 1,
     "name": "Bert's Beets",
-    "price": 2
+    "price_level": 2
   },
   {
     "id": 3,
     "name": "Wrapscallion",
-    "price": 2
+    "price_level": 2
   }
 ]
 ```
 
 ---
 
-## 🔹 8. GET `/get-food-trucks-sorted-by-rating`
+## 🔹 8. GET `/get-food-trucks-count`
 
 **Description:** Retrieves the total number of food trucks in the database.
 
@@ -268,7 +286,9 @@ INSERT INTO food_trucks (id, name, current_location, daily_special, slogan, has_
   "current_location": "Pier 7",
   "daily_special": "Hurricane Tacos",
   "slogan": "Blow your taste buds away",
-  "has_vegan_options": true
+  "has_vegan_options": true,
+  "price_level": 3,
+  "rating": 4.1
 }
 ```
 
