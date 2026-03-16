@@ -76,23 +76,26 @@ async function addOneFoodTruck(
 
 async function deleteOneFoodTruck(id) {
 
-    const truckData = await db.query(
+  // We've passed in an id value from the url which we use to query the server which then loads the data into the 'truckName' variable. This lets me create a more user-centric result.
+  // '$1' is a dynamic value loaded with the value of the first item in our array, [id].
+    const truckName = await db.query(
         `SELECT name FROM food_trucks WHERE id = $1`, [id]
     );
 
+  // Small error handling in case the truck has either already been deleted or did not exist in the first place.
     if (truckData.rows.length === 0) {
-        return `No animal found with id ${id}`;
+        return `No truck found with id ${id}, or name ${truckName}`;
     }
 
-    const animalName = animalData.rows[0].name;
-
+  // This runs only once when we run the function and is the main line of code that actually carries out the deletion of the food truck.
     await db.query(
         `DELETE FROM animals WHERE id = $1`, [id]
     );
 
-    console.log(`Success! ${animalName} was deleted!`);
+  // Both the console log and the return are merely there to return a confirmation to the user and us. 
+    console.log(`Success! ${truckName} #${id} was deleted!`);
 
-    return `Success! ${animalName} was deleted!`;
+    return `Success! ${truckName} #${id} was deleted!`;
 
 };
 
@@ -153,24 +156,26 @@ app.post("/add-one-food-truck", async (req, res) => {
 
 // Priscilla's Code
 
-app.get("/delete-one-food-truck/:id", async (req, res) => {
-  
-  let truckId = await db.query(`SELECT id FROM food_trucks WHERE id = $1`, [id]);
+app.post('/delete-one-food-truck/:id', async (req, res) => {
 
-  if (truckId.rows.length === 0) {
-    return `No truck found with id of ${id}`
-  }
+    try {
 
-  const truckName = truckData.rows[0].name;
-  
-  await db.query(`DELETE FROM food_trucks WHERE id = $1`, [id]);
+      // Creates a variable from the ':id' entered in the url.
+        let id = req.params.id;
 
-  console.log(`Success! Truck #${id}, ${truckName} was deleted ✨`);
+      // Here, a reply will 
+        const result = await deleteOneAnimal(id);
 
-  return `Success! Truck #${id}, ${truckName} was deleted ✨`;
+        res.send(result);
+    
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: 'There was an issue while deleting the animal. Please review your request and try again'
+        })
+    }
 
 });
-
 // 11. POST /update-food-truck-location
 
 // 12. POST /update-food-truck-rating
