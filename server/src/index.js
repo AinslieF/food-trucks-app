@@ -30,6 +30,18 @@ async function getAllFoodTrucks() {
 }
 
 // 2. getFoodTruckById(id)
+// helper function that finds a food truck using its id
+async function getFoodTruckById(id) {
+
+  // query the database for the food truck with this id
+  const result = await db.query(
+    "SELECT * FROM food_trucks WHERE id = $1",
+    [id]
+  );
+
+  // returns the food truck that was found
+  return result.rows[0];
+}
 
 // 3. getVeganFoodTrucks()
 
@@ -124,6 +136,18 @@ app.get("/get-all-food-trucks", async (req, res) => {
 });
 
 // 2. GET /get-food-truck-by-id/:id
+// endpoint that returns one food truck by its id
+app.get("/get-food-truck-by-id/:id", async (req, res) => {
+
+  // gets the id from the URL
+  const id = req.params.id;
+
+  // calls the helper function
+  const foodTruck = await getFoodTruckById(id);
+
+  // sends the food truck back as JSON
+  res.json(foodTruck);
+});
 
 // 3. GET /get-vegan-food-trucks
 
