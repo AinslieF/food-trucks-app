@@ -50,6 +50,8 @@ By doing this activity together, we will practice...
 
 In the `server/src` folder, create a `config.js` file. Your instructor will provide you with code that you will copy and paste into this file, which will contain the access credentials to the Food Trucks database that's already hosted on Neon. 
 
+---
+
 ### 🛠️ 3. Making a new branch in your Github repo
 
 1. Create a branch called “new-feature”
